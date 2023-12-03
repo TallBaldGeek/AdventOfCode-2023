@@ -86,9 +86,9 @@ void part2()
 			{ "green", 0 },
 			{ "blue", 0 }
 		};
-		var colonPos = line.IndexOf(':');
-		var gameIdx = int.Parse(line.Substring(5, colonPos - 5));
-		var rounds = line.Substring(colonPos + 1).Split(';');
+		var gameInfo = line.Split(':');
+		var gameIdx = int.Parse(gameInfo[0].Split(' ')[1]);
+		var rounds = gameInfo[1].Split(';');
 		foreach (var round in rounds)
 		{
 			//3 blue, 4 red;
@@ -102,10 +102,8 @@ void part2()
 					if (dice.Contains(color))
 					{
 						var numDice = int.Parse(dice.Replace(color, string.Empty).Trim());
-						if (numDice > minByColor[color])
-						{
-							minByColor[color] = numDice;
-						}
+						//Math.Max borrowed from https://github.com/MartinZikmund/advent-of-code-2023/blob/main/Day02_2/Program.cs
+						minByColor[color] = Math.Max(minByColor[color], numDice);
 					}
 				}
 			}
