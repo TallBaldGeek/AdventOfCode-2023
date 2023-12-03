@@ -2,8 +2,9 @@
 using System.Buffers;
 using System.Reflection;
 using System.Text;
+using Utilities;
 
-var _input = ReadAllResourceLines("input.txt");//await File.ReadAllLinesAsync("input.txt");
+var _input = Utils.ReadAllResourceLines(Assembly.GetExecutingAssembly(), "input.txt");//await File.ReadAllLinesAsync("input.txt");
 
 
 var _translations = new Dictionary<string, string>
@@ -31,27 +32,6 @@ var _translations = new Dictionary<string, string>
 
 partOne();
 partTwo();
-
-string[] ReadAllResourceLines(string resourceName)
-{
-	var executingAssembly = Assembly.GetExecutingAssembly();
-	var assemblyName = executingAssembly.GetName().Name;
-	using var stream = executingAssembly.GetManifestResourceStream($"{assemblyName}.{resourceName}")!;
-	using var streamReader = new StreamReader(stream, Encoding.UTF8);
-	{
-		return EnumerateLines(streamReader).ToArray();
-	}
-}
-
-IEnumerable<string> EnumerateLines(TextReader reader)
-{
-	string line;
-
-	while ((line = reader.ReadLine()) != null)
-	{
-		yield return line;
-	}
-}
 
 void partOne()
 {
