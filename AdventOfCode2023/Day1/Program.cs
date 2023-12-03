@@ -1,31 +1,63 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using System.Buffers;
-using System.Runtime.CompilerServices;
-using System.Threading;
+using System.Reflection;
+using System.Text;
 
-var _input = await File.ReadAllLinesAsync("input.txt");
-//Console.WriteLine($"Read {_input.Length} lines");
+var _input = ReadAllResourceLines("input.txt");//await File.ReadAllLinesAsync("input.txt");
+
+
 var _translations = new Dictionary<string, string>
 	{
+		{ "0", "0"  },
+		{ "1", "1" },
 		{"one", "1" },
+		{ "2", "2" },
 		{"two", "2" },
+		{ "3", "3"  },
 		{"three", "3" },
+		{ "4", "4"  },
 		{"four","4" },
+		{ "5", "5"  },
 		{"five","5" },
+		{ "6", "6" },
 		{"six","6" },
+		{ "7", "7"  },
 		{"seven","7" },
+		{ "8","8" },
 		{"eight", "8" },
+		{ "9","9" },
 		{"nine","9" }
 	};
 
 partOne();
 partTwo();
 
+string[] ReadAllResourceLines(string resourceName)
+{
+	var executingAssembly = Assembly.GetExecutingAssembly();
+	var assemblyName = executingAssembly.GetName().Name;
+	using var stream = executingAssembly.GetManifestResourceStream($"{assemblyName}.{resourceName}")!;
+	using var streamReader = new StreamReader(stream, Encoding.UTF8);
+	{
+		return EnumerateLines(streamReader).ToArray();
+	}
+}
+
+IEnumerable<string> EnumerateLines(TextReader reader)
+{
+	string line;
+
+	while ((line = reader.ReadLine()) != null)
+	{
+		yield return line;
+	}
+}
+
 void partOne()
 {
 	Console.WriteLine("PART 1 start");
-	//var validDigits = "0123456789";
-	//SearchValues<char> digitSearchValues = SearchValues.Create(validDigits);
+	
+	//SearchValues<char> digitSearchValues = SearchValues.Create("0123456789");
 	char[] validDigits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 	var calibrationValues = new List<int>();
 	foreach (var value in _input)
@@ -36,7 +68,7 @@ void partOne()
 		{
 			Console.WriteLine($"didn't find what I was looking for in {value}");
 		}
-		var toParse = value.Substring(firstIdx, 1) + value.Substring(lastIdx, 1);
+		var toParse = string.Concat(value.AsSpan(firstIdx, 1), value.AsSpan(lastIdx, 1));
 		//Console.WriteLine(toParse );
 		calibrationValues.Add(int.Parse(toParse));
 	}
@@ -52,7 +84,6 @@ void partTwo()
 {
 	Console.WriteLine("PART 2 start");
 	var calibrationValues = new List<int>();
-	string[] validDigits = { "0", "1", "one", "2", "two", "3", "three", "4", "four", "5", "five", "6", "six", "7", "seven", "8", "eight", "9", "nine" };
 
 	foreach (var value in _input)
 	{
@@ -60,7 +91,7 @@ void partTwo()
 		var lastIdx = 0;
 		var firstDigit = string.Empty;
 		var lastDigit = string.Empty;
-		foreach (var digit in validDigits)
+		foreach (var digit in _translations.Keys)
 		{
 			var pos = value.IndexOf(digit);
 
@@ -77,19 +108,10 @@ void partTwo()
 				lastDigit = digit;
 			}
 		}
-		var calibration = int.Parse(parseDigit(firstDigit) + parseDigit(lastDigit));
+		var calibration = int.Parse(_translations[firstDigit] + _translations[lastDigit]);
 		calibrationValues.Add(calibration);
 	}
 	var total = calibrationValues.Sum();
 	Console.WriteLine($"PART 2 - Total is {total}");
-}
-
-string parseDigit(string input)
-{
-	if (input.Length == 1)
-	{
-		return input;
-	}
-
-	return _translations[input];
+	//correct answer is 55358
 }

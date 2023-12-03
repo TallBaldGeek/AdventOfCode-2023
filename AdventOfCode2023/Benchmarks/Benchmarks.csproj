@@ -8,13 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="input.txt" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.10" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="input.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
+    <None Update="day1-input.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
