@@ -102,7 +102,7 @@ namespace Day03
 
 		private static void part2()
 		{
-			SearchValues<char> digitSearchValues = SearchValues.Create(".0123456789");
+			SearchValues<char> digitSearchValues = SearchValues.Create("0123456789");//not looking for "."
 			var _input = Utils.ReadAllResourceLines(Assembly.GetExecutingAssembly(), "input.txt");
 			var padded = new List<string>
 			{
@@ -123,7 +123,80 @@ namespace Day03
 				{
 					if (currentLine[charIdx] == '*')
 					{
+						var numbers = new List<int>();
+						var adjacentNumberLocations = new Dictionary<string, bool>
+						{
+							{ "left", false },
+							{ "right", false },
+							{ "top", false },
+							{ "bottom", false }
+						};
+						if (charIdx > 0 && char.IsDigit(currentLine[charIdx - 1]))
+						{
+							//adjacentNumberLocations["left"] = true;
+							var numberIdx = charIdx;
+							while (numberIdx > 0 && char.IsDigit(currentLine[numberIdx - 1]))
+							{
+								numberIdx--;
+							}
 
+							var number = currentLine.AsSpan().Slice(numberIdx, charIdx - numberIdx).ToString();
+							numbers.Add(int.Parse(number));
+						}
+
+						if (charIdx < lineLength && char.IsDigit(currentLine[charIdx + 1]))
+						{
+							//adjacentNumberLocations["right"] = true;
+							var numberStartIdx = charIdx + 1;
+							var numberEndIdx = numberStartIdx;
+							while (numberEndIdx < lineLength && char.IsDigit(currentLine[numberEndIdx + 1]))
+							{
+								numberEndIdx++;
+							}
+
+							var number = currentLine.AsSpan().Slice(numberStartIdx, numberEndIdx - numberStartIdx + 1).ToString();
+							numbers.Add(int.Parse(number));
+						}
+
+						//look for diagonal on the adjacent lines
+						var adjacentLineStart = charIdx;
+						if (adjacentLineStart > 0)
+						{
+							adjacentLineStart--;
+						}
+						var adjacentLineEnd = charIdx;
+						if (adjacentLineEnd < lineLength)
+						{
+							adjacentLineEnd++;
+						}
+						var adjacentSliceLength = adjacentLineEnd - adjacentLineStart + 1;
+						while (adjacentLineStart + adjacentSliceLength > lineLength)
+						{
+							adjacentSliceLength--;
+						}
+
+						var priorLineSlice = previousLine.AsSpan().Slice(adjacentLineStart, adjacentSliceLength);
+						foreach (var c in priorLineSlice)
+						{
+							if (char.IsDigit(c))
+							{
+								adjacentNumberLocations["top"] = true;
+							}
+						}
+
+						var nextLineSlice = nextLine.AsSpan().Slice(adjacentLineStart, adjacentSliceLength);
+						foreach (var c in nextLineSlice)
+						{
+							if (char.IsDigit(c))
+							{
+								adjacentNumberLocations["bottom"] = true;
+							}
+						}
+
+						if (numbers.Count == 2)
+						{
+							gearRatios.Add(numbers[0] * numbers[1]);
+						}
 					}
 					/*
 					if (char.IsDigit(currentLine[charIdx]))
