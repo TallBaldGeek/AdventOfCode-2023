@@ -10,6 +10,7 @@ namespace Day04
 			Console.WriteLine("Hello, World!");
 
 			partOne();
+			partTwo();
 		}
 
 		private static void partOne()
@@ -19,12 +20,35 @@ namespace Day04
 			foreach (var line in _input)
 			{
 				//Card   1: 18 39  5 97 33 74 70 35 40 72 | 62 23 33 94 18  5 91 74 86 88 82 72 51 39 95 35 44 87 65 15 46 10  3  2 84
-				totalPoints.Add(determinePointsForGame(line));
+				totalPoints.Add(determinePointsForGameOne(line));
 			}
 			Console.WriteLine($"Total points = {totalPoints.Sum()}");
 			//wrong answer = 47694 (too high)
 			//correct answer = 23847
 		}
+
+
+		private static void partTwo()
+		{
+			var _input = Utils.ReadAllResourceLines(Assembly.GetExecutingAssembly(), "input.txt");
+
+			var cardCopies = new Dictionary<int, int>();
+			foreach (var line in _input)
+			{
+				var cardNumber = line.Split(':')[0].Split(' ', StringSplitOptions.RemoveEmptyEntries)[1];
+				cardCopies.Add(int.Parse(cardNumber), 1);
+				var gameData = line.Split(':')[1].Split('|');
+				var winningNumbers = parseNumberString(gameData[0]);
+				var yourNumbers = parseNumberString(gameData[1]);
+
+				var winnerCount = winningNumbers.Count(x => yourNumbers.Contains(x));
+
+
+			}
+			Console.WriteLine($"Total cards = {cardCopies.Values.Sum()}");
+		}
+
+
 		static IEnumerable<int> parseNumberString(string input)
 		{
 			return input
@@ -33,7 +57,7 @@ namespace Day04
 				.Select(s => int.Parse(s));
 		}
 
-		static int determinePointsForGame(string game)
+		static int determinePointsForGameOne(string game)
 		{
 			var points = 0;
 			var gameData = game.Split(':')[1].Split('|');
