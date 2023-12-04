@@ -124,16 +124,8 @@ namespace Day03
 					if (currentLine[charIdx] == '*')
 					{
 						var numbers = new List<int>();
-						var adjacentNumberLocations = new Dictionary<string, bool>
-						{
-							{ "left", false },
-							{ "right", false },
-							{ "top", false },
-							{ "bottom", false }
-						};
 						if (charIdx > 0 && char.IsDigit(currentLine[charIdx - 1]))
 						{
-							//adjacentNumberLocations["left"] = true;
 							var numberIdx = charIdx;
 							while (numberIdx > 0 && char.IsDigit(currentLine[numberIdx - 1]))
 							{
@@ -146,7 +138,6 @@ namespace Day03
 
 						if (charIdx < lineLength && char.IsDigit(currentLine[charIdx + 1]))
 						{
-							//adjacentNumberLocations["right"] = true;
 							var numberStartIdx = charIdx + 1;
 							var numberEndIdx = numberStartIdx;
 							while (numberEndIdx < lineLength && char.IsDigit(currentLine[numberEndIdx + 1]))
@@ -180,7 +171,6 @@ namespace Day03
 						{
 							if (char.IsDigit(c))
 							{
-								adjacentNumberLocations["top"] = true;
 							}
 						}
 
@@ -189,7 +179,6 @@ namespace Day03
 						{
 							if (char.IsDigit(c))
 							{
-								adjacentNumberLocations["bottom"] = true;
 							}
 						}
 
