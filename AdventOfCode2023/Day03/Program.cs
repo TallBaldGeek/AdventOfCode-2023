@@ -124,6 +124,7 @@ namespace Day03
 					if (currentLine[charIdx] == '*')
 					{
 						var numbers = new List<int>();
+						//look left
 						if (charIdx > 0 && char.IsDigit(currentLine[charIdx - 1]))
 						{
 							var numberIdx = charIdx;
@@ -136,6 +137,7 @@ namespace Day03
 							numbers.Add(int.Parse(number));
 						}
 
+						//look right
 						if (charIdx < lineLength && char.IsDigit(currentLine[charIdx + 1]))
 						{
 							var numberStartIdx = charIdx + 1;
@@ -149,104 +151,90 @@ namespace Day03
 							numbers.Add(int.Parse(number));
 						}
 
-						//look for diagonal on the adjacent lines
-						var adjacentLineStart = charIdx;
-						if (adjacentLineStart > 0)
+						/*
+						 need to account for this
+							......666
+							...*.....
+							298.67...
+						   
+						 */
+						//look up
+						var upNumber = searchForPossibleNumber(previousLine, charIdx);
+						if (!string.IsNullOrEmpty(upNumber))
 						{
-							adjacentLineStart--;
-						}
-						var adjacentLineEnd = charIdx;
-						if (adjacentLineEnd < lineLength)
-						{
-							adjacentLineEnd++;
-						}
-						var adjacentSliceLength = adjacentLineEnd - adjacentLineStart + 1;
-						while (adjacentLineStart + adjacentSliceLength > lineLength)
-						{
-							adjacentSliceLength--;
+							numbers.Add(int.Parse(upNumber));
 						}
 
-						var priorLineSlice = previousLine.AsSpan().Slice(adjacentLineStart, adjacentSliceLength);
-						foreach (var c in priorLineSlice)
+						//look down
+						var downNumber = searchForPossibleNumber(nextLine, charIdx);
+						if (!string.IsNullOrEmpty(downNumber))
 						{
-							if (char.IsDigit(c))
-							{
-							}
+							numbers.Add(int.Parse(downNumber));
 						}
 
-						var nextLineSlice = nextLine.AsSpan().Slice(adjacentLineStart, adjacentSliceLength);
-						foreach (var c in nextLineSlice)
+						switch (numbers.Count)
 						{
-							if (char.IsDigit(c))
-							{
-							}
-						}
-
-						if (numbers.Count == 2)
-						{
-							gearRatios.Add(numbers[0] * numbers[1]);
+							case > 2:
+								throw new Exception("You done messed up");
+							case 2:
+								gearRatios.Add(numbers[0] * numbers[1]);
+								break;
 						}
 					}
-					/*
-					if (char.IsDigit(currentLine[charIdx]))
-					{
-						var numstart = charIdx;
-						while ((charIdx + 1) < lineLength && char.IsDigit(currentLine[charIdx + 1]))
-						{
-							charIdx++;
-						}
-						var numEnd = charIdx;
-						var digits = currentLine.AsSpan().Slice(numstart, numEnd - numstart + 1).ToString();
-						if (numstart > 0 && !digitSearchValues.Contains(currentLine[numstart - 1]))
-						{
-							//prior character is a special
-							gearRatios.Add(int.Parse(digits));
-						}
-						else if (numEnd < lineLength - 1 && !digitSearchValues.Contains(currentLine[numEnd + 1]))
-						{
-							//next character same line is a special
-							gearRatios.Add(int.Parse(digits));
-						}
-						else
-						{
-							//look for diagonal on the prior line
-							var adjacentLineStart = numstart;
-							if (adjacentLineStart > 0)
-							{
-								adjacentLineStart--;
-							}
-							var adjacentLineEnd = numEnd;
-							if (adjacentLineEnd < lineLength)
-							{
-								adjacentLineEnd++;
-							}
-							var adjacentSliceLength = adjacentLineEnd - adjacentLineStart + 1;
-							while (adjacentLineStart + adjacentSliceLength > lineLength)
-							{
-								adjacentSliceLength--;
-							}
-							var priorLineSlice = previousLine.AsSpan().Slice(adjacentLineStart, adjacentSliceLength);
-							var nextLineSlice = nextLine.AsSpan().Slice(adjacentLineStart, adjacentSliceLength);
-							if (priorLineSlice.IndexOfAnyExcept(digitSearchValues) > -1 ||
-								nextLineSlice.IndexOfAnyExcept(digitSearchValues) > -1)
-							{
-								gearRatios.Add(int.Parse(digits));
-							}
-						}
 
-
-					}
-					*/
 					charIdx++;
-					//currentLine.First(line => char.IsDigit(line))
-					//if (currentLine[charIdx].Is)
 				}
 			}
 
 			var total = gearRatios.Sum();
 			Console.WriteLine($"Total of valid part numbers is {total}");
 
-			//correct answer is 549908
+			//guess 76174505 is too low
+			//correct answer is 
+		}
+
+		private static string searchForPossibleNumber(string line, int index)
+		{
+			var foundNumber = string.Empty;
+			var adjacentEnd = -1; //adjacentIdx < lineLength ? adjacentIdx + 1 : lineLength;
+			if (index < lineLength && char.IsDigit(line[index + 1]))
+			{
+				//number in prior line diagonal above, need to find the end of it
+				/*
+				.....123...
+				....*.702..
+				 */
+				adjacentEnd = index;
+				while (adjacentEnd < lineLength && char.IsDigit(line[adjacentEnd + 1]))
+				{
+					adjacentEnd++;
+				}
+			}
+			else if (char.IsDigit(line[index]))
+			{
+				//End of number in prior line directly above. We know because it was not above and right (prior check)
+				/*
+				..123......
+				....*.702..
+				 */
+				adjacentEnd = index;
+			}
+			else if (index > 0 && char.IsDigit(line[index - 1]))
+			{
+				adjacentEnd = index - 1;
+			}
+
+			if (adjacentEnd > -1)
+			{
+				//There was an adjacent number and we know the end of it. Find the start
+				var adjacentStart = adjacentEnd;
+				while (adjacentStart > 0 && char.IsDigit(line[adjacentStart - 1]))
+				{
+					adjacentStart--;
+				}
+				foundNumber = line.AsSpan().Slice(adjacentStart, adjacentEnd - adjacentStart + 1).ToString();
+			}
+			return foundNumber;
 		}
 	}
 }
