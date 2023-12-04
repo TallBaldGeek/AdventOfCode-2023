@@ -123,6 +123,15 @@ namespace Day03
 				{
 					if (currentLine[charIdx] == '*')
 					{
+						var numbers = new List<int>();
+						//look left
+						if (charIdx > 0 && char.IsDigit(currentLine[charIdx - 1]))
+						{
+							var numberIdx = charIdx;
+							while (numberIdx > 0 && char.IsDigit(currentLine[numberIdx - 1]))
+							{
+								numberIdx--;
+							}
 
 							var number = currentLine.AsSpan().Slice(numberIdx, charIdx - numberIdx).ToString();
 							numbers.Add(int.Parse(number));
