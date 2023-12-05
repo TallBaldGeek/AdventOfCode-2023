@@ -159,17 +159,67 @@ namespace Day03
 						   
 						 */
 						//look up
-						var upNumber = searchForPossibleNumber(previousLine, charIdx);
-						if (!string.IsNullOrEmpty(upNumber))
+						if (char.IsDigit(previousLine[charIdx]))
 						{
-							numbers.Add(int.Parse(upNumber));
+							//there's a number right above, which means there can't be one above diagonal
+							/*
+							 ..555...
+							 ...*....
+							 */
+							var upNumber = searchForPossibleNumberAtSameIndex(previousLine, charIdx);
+							if (!string.IsNullOrEmpty(upNumber))
+							{
+								numbers.Add(int.Parse(upNumber));
+							}
+						}
+						else
+						{
+							var uprightNumber = searchForPossibleNumberDiagonalRight(previousLine, charIdx);
+							if (!string.IsNullOrEmpty(uprightNumber))
+							{
+								numbers.Add(int.Parse(uprightNumber));
+							}
+
+							var upleftNumber = searchForPossibleNumberDiagonalLeft(previousLine, charIdx);
+							if (!string.IsNullOrEmpty(upleftNumber))
+							{
+								numbers.Add(int.Parse(upleftNumber));
+							}
 						}
 
 						//look down
-						var downNumber = searchForPossibleNumber(nextLine, charIdx);
-						if (!string.IsNullOrEmpty(downNumber))
+						//var downNumber = searchForPossibleNumberAtSameIndex(nextLine, charIdx);
+						//if (!string.IsNullOrEmpty(downNumber))
+						//{
+						//	numbers.Add(int.Parse(downNumber));
+						//}
+
+						if (char.IsDigit(nextLine[charIdx]))
 						{
-							numbers.Add(int.Parse(downNumber));
+							//there's a number right above, which means there can't be one above diagonal
+							/*
+							 ..555...
+							 ...*....
+							 */
+							var downNumber = searchForPossibleNumberAtSameIndex(nextLine, charIdx);
+							if (!string.IsNullOrEmpty(downNumber))
+							{
+								numbers.Add(int.Parse(downNumber));
+							}
+						}
+						else
+						{
+							var downrightNumber = searchForPossibleNumberDiagonalRight(nextLine, charIdx);
+							if (!string.IsNullOrEmpty(downrightNumber))
+							{
+								numbers.Add(int.Parse(downrightNumber));
+							}
+
+							var downleftNumber = searchForPossibleNumberDiagonalLeft(nextLine, charIdx);
+							if (!string.IsNullOrEmpty(downleftNumber))
+							{
+								numbers.Add(int.Parse(downleftNumber));
+							}
 						}
 
 						switch (numbers.Count)
@@ -190,51 +240,79 @@ namespace Day03
 			Console.WriteLine($"Total of valid part numbers is {total}");
 
 			//guess 76174505 is too low
-			//correct answer is 
+			//correct answer is 81166799
 		}
 
-		private static string searchForPossibleNumber(string line, int index)
+		private static string searchForPossibleNumberAtSameIndex(string line, int index)
 		{
-			var foundNumber = string.Empty;
-			var adjacentEnd = -1; //adjacentIdx < lineLength ? adjacentIdx + 1 : lineLength;
-			if (index < lineLength && char.IsDigit(line[index + 1]))
+			if (char.IsDigit(line[index]))
 			{
-				//number in prior line diagonal above, need to find the end of it
+				//Number in prior line directly above.
 				/*
-				.....123...
+				...123.....
 				....*.702..
 				 */
-				adjacentEnd = index;
+				var adjacentEnd = index;
+
+				//There was an adjacent number and we need to find the end of it
 				while (adjacentEnd < lineLength && char.IsDigit(line[adjacentEnd + 1]))
 				{
 					adjacentEnd++;
 				}
+				//and the start
+				var adjacentStart = index;
+				while (adjacentStart > 0 && char.IsDigit(line[adjacentStart - 1]))
+				{
+					adjacentStart--;
+				}
+				return line.AsSpan().Slice(adjacentStart, adjacentEnd - adjacentStart + 1).ToString();
 			}
-			else if (char.IsDigit(line[index]))
+			return string.Empty;
+		}
+		private static string searchForPossibleNumberDiagonalRight(string line, int index)
+		{
+			if (index > 0 && char.IsDigit(line[index - 1]))
 			{
-				//End of number in prior line directly above. We know because it was not above and right (prior check)
+				//number in prior line diagonal above right, need to find the end of it
 				/*
-				..123......
+				.....123...
 				....*.702..
 				 */
-				adjacentEnd = index;
-			}
-			else if (index > 0 && char.IsDigit(line[index - 1]))
-			{
-				adjacentEnd = index - 1;
-			}
-
-			if (adjacentEnd > -1)
-			{
-				//There was an adjacent number and we know the end of it. Find the start
+				var adjacentEnd = index - 1;
 				var adjacentStart = adjacentEnd;
 				while (adjacentStart > 0 && char.IsDigit(line[adjacentStart - 1]))
 				{
 					adjacentStart--;
 				}
-				foundNumber = line.AsSpan().Slice(adjacentStart, adjacentEnd - adjacentStart + 1).ToString();
+				return line.AsSpan().Slice(adjacentStart, adjacentEnd - adjacentStart + 1).ToString();
 			}
-			return foundNumber;
+
+			return string.Empty;
+		}
+
+		private static string searchForPossibleNumberDiagonalLeft(string line, int index)
+		{
+			if (index < lineLength && char.IsDigit(line[index + 1]))
+			{
+				//number in prior line diagonal above left, need to find the beginning of it
+				/*
+				.123...123.
+				....*.702..
+				 */
+				var adjacentEnd = index;
+				while (adjacentEnd < lineLength && char.IsDigit(line[adjacentEnd + 1]))
+				{
+					adjacentEnd++;
+				}
+				var adjacentStart = adjacentEnd;
+				while (adjacentStart > 0 && char.IsDigit(line[adjacentStart - 1]))
+				{
+					adjacentStart--;
+				}
+				return line.AsSpan().Slice(adjacentStart, adjacentEnd - adjacentStart + 1).ToString();
+			}
+
+			return string.Empty;
 		}
 	}
 }

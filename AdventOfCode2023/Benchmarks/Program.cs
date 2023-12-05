@@ -1,54 +1,47 @@
-﻿using System;
-using System.Security.Cryptography;
-using BenchmarkDotNet.Attributes;
+﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
+using Day04;
+using System.Reflection;
+using Utilities;
 
 namespace MyBenchmarks
 {
-	public class Day1Approaches
+	[MemoryDiagnoser]
+	public class Day4Approaches
 	{
 		private string[] _input;
-		private readonly Dictionary<string, string> _translations = new()
-		{
-		{ "0", "0"  },
-		{ "1", "1" },
-		{"one", "1" },
-		{ "2", "2" },
-		{"two", "2" },
-		{ "3", "3"  },
-		{"three", "3" },
-		{ "4", "4"  },
-		{"four","4" },
-		{ "5", "5"  },
-		{"five","5" },
-		{ "6", "6" },
-		{"six","6" },
-		{ "7", "7"  },
-		{"seven","7" },
-		{ "8","8" },
-		{"eight", "8" },
-		{ "9","9" },
-		{"nine","9" }
-	};
+
 
 		[GlobalSetup]
-		public async Task Init()
+		public void Init()
 		{
-			_input = await File.ReadAllLinesAsync("input.txt");
+			_input = Utils.ReadAllResourceLines(Assembly.GetExecutingAssembly(), "day04-input.txt");
 		}
 
-  //      [Benchmark]
-		//public byte[] Sha256() => sha256.ComputeHash(data);
+		[Benchmark]
+		public int Day04_2_Original()
+		{
+			return Day04Calculations.PartTwo(_input);
+		}
 
-		//[Benchmark]
-		//public byte[] Md5() => md5.ComputeHash(data);
+		[Benchmark]
+		public int Day04_2_Refactored()
+		{
+			return Day04Calculations.PartTwo_Refactored(_input);
+		}
+
+		[Benchmark]
+		public int Day04_2_Borrowed()
+		{
+			return Day04Calculations.PartTwo_Borrowed(_input);
+		}
 	}
 
 	public class Program
 	{
 		public static void Main(string[] args)
 		{
-			var summary = BenchmarkRunner.Run<Day1Approaches>();
+			var summary = BenchmarkRunner.Run<Day4Approaches>();
 		}
 	}
 }
