@@ -33,19 +33,32 @@ namespace Day04
 			var _input = Utils.ReadAllResourceLines(Assembly.GetExecutingAssembly(), "input.txt");
 
 			var cardCopies = new Dictionary<int, int>();
+			for (int i = 1; i < _input.Length + 1; i++)
+			{
+				cardCopies.Add(i, 1);
+			}
 			foreach (var line in _input)
 			{
-				var cardNumber = line.Split(':')[0].Split(' ', StringSplitOptions.RemoveEmptyEntries)[1];
-				cardCopies.Add(int.Parse(cardNumber), 1);
+				var cardNumber = int.Parse(line.Split(':')[0].Split(' ', StringSplitOptions.RemoveEmptyEntries)[1]);
 				var gameData = line.Split(':')[1].Split('|');
 				var winningNumbers = parseNumberString(gameData[0]);
 				var yourNumbers = parseNumberString(gameData[1]);
 
 				var winnerCount = winningNumbers.Count(x => yourNumbers.Contains(x));
-
+				var nextCard = cardNumber + 1;
+				var finalCard = nextCard + winnerCount;
+				var copiesOfCurrentCard = cardCopies[cardNumber];
+				for (int j = 0; j < copiesOfCurrentCard; j++)
+				{
+					for (int i = nextCard; i < finalCard; i++)
+					{
+						cardCopies[i] = cardCopies[i] + 1;
+					}
+				}
 
 			}
 			Console.WriteLine($"Total cards = {cardCopies.Values.Sum()}");
+			//correct answer = 8570000
 		}
 
 
