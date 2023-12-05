@@ -8,20 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="day04-input.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="day04-input.txt">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.13.10" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Day03\Day03.csproj" />
     <ProjectReference Include="..\Day04\Day04.csproj" />
     <ProjectReference Include="..\Utilities\Utilities.csproj" />
   </ItemGroup>

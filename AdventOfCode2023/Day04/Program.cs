@@ -1,7 +1,4 @@
-﻿using System.Reflection;
-using Utilities;
-
-namespace Day04
+﻿namespace Day04
 {
 	internal class Program
 	{
@@ -9,7 +6,7 @@ namespace Day04
 		{
 			Console.WriteLine("Hello, World!");
 
-			var input = Utils.ReadAllResourceLines(Assembly.GetExecutingAssembly(), "input.txt");
+			var input = Day04Calculations.GetInput();
 
 			Console.WriteLine($"Total points = {Day04Calculations.PartOne(input)}");
 			//wrong answer = 47694 (too high)

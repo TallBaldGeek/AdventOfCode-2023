@@ -1,16 +1,22 @@
 ﻿using System.Buffers;
+using System.Reflection;
+using Utilities;
 
 namespace Day03
 {
 	public static class Day03Logic
 	{
 		private static string noCharacterLine = "............................................................................................................................................";
-		private static int lineLength = 140;
+		private static int LINE_LENGTH = 140;
+
+		public static string[] GetInput()
+		{
+			return Utils.ReadAllResourceLines(Assembly.GetExecutingAssembly(), "input.txt");
+		}
 
 		public static int PartOne(string[] input)
 		{
-			//var lineLength = input[0].Length;
-			SearchValues<char> digitSearchValues = SearchValues.Create(".0123456789");
+			var digitSearchValues = SearchValues.Create(".0123456789");
 			Console.WriteLine($"found {input.Length} lines");
 			var padded = new List<string>
 			{
@@ -18,8 +24,6 @@ namespace Day03
 			};
 			padded.AddRange(input);
 			padded.Add(noCharacterLine);
-			//......124..................418.......587......770...........672.................564............................438..........512......653....
-			//............................................................................................................................................
 			var validPartNumbers = new List<int>();
 			for (int i = 1; i < padded.Count - 1; i++)
 			{
@@ -27,14 +31,13 @@ namespace Day03
 				var previousLine = padded[i - 1];
 				var currentLine = padded[i];
 				var nextLine = padded[i + 1];
-
 				var charIdx = 0;
-				while (charIdx < lineLength)
+				while (charIdx < LINE_LENGTH)
 				{
 					if (char.IsDigit(currentLine[charIdx]))
 					{
 						var numstart = charIdx;
-						while ((charIdx + 1) < lineLength && char.IsDigit(currentLine[charIdx + 1]))
+						while ((charIdx + 1) < LINE_LENGTH && char.IsDigit(currentLine[charIdx + 1]))
 						{
 							charIdx++;
 						}
@@ -45,7 +48,7 @@ namespace Day03
 							//prior character is a special
 							validPartNumbers.Add(int.Parse(digits));
 						}
-						else if (numEnd < lineLength - 1 && !digitSearchValues.Contains(currentLine[numEnd + 1]))
+						else if (numEnd < LINE_LENGTH - 1 && !digitSearchValues.Contains(currentLine[numEnd + 1]))
 						{
 							//next character same line is a special
 							validPartNumbers.Add(int.Parse(digits));
@@ -59,13 +62,13 @@ namespace Day03
 								adjacentLineStart--;
 							}
 							var adjacentLineEnd = numEnd;
-							if (adjacentLineEnd < lineLength)
-							{
+							if (adjacentLineEnd < LINE_LENGTH)
+							{//don't go past the beginning of a line
 								adjacentLineEnd++;
 							}
 							var adjacentSliceLength = adjacentLineEnd - adjacentLineStart + 1;
-							while (adjacentLineStart + adjacentSliceLength > lineLength)
-							{
+							while (adjacentLineStart + adjacentSliceLength > LINE_LENGTH)
+							{//don't go past the end of a line
 								adjacentSliceLength--;
 							}
 							var priorLineSlice = previousLine.AsSpan().Slice(adjacentLineStart, adjacentSliceLength);
@@ -76,23 +79,17 @@ namespace Day03
 								validPartNumbers.Add(int.Parse(digits));
 							}
 						}
-
-
 					}
 					charIdx++;
-					//currentLine.First(line => char.IsDigit(line))
-					//if (currentLine[charIdx].Is)
 				}
 			}
 
 			return validPartNumbers.Sum();
 		}
 
+
 		public static int PartTwo(string[] input)
 		{
-			//var lineLength = input[0].Length;
-
-			SearchValues<char> digitSearchValues = SearchValues.Create("0123456789");//not looking for "."
 			var padded = new List<string>
 			{
 				noCharacterLine
@@ -100,15 +97,14 @@ namespace Day03
 			padded.AddRange(input);
 			padded.Add(noCharacterLine);
 			var gearRatios = new List<int>();
-			for (int i = 1; i < padded.Count - 1; i++)
+			for (var i = 1; i < padded.Count - 1; i++)
 			{
 				//padded makes it safe to check line 2 through end-1
 				var previousLine = padded[i - 1];
 				var currentLine = padded[i];
 				var nextLine = padded[i + 1];
-
 				var charIdx = 0;
-				while (charIdx < lineLength)
+				while (charIdx < LINE_LENGTH)
 				{
 					if (currentLine[charIdx] == '*')
 					{
@@ -127,11 +123,11 @@ namespace Day03
 						}
 
 						//look right
-						if (charIdx < lineLength && char.IsDigit(currentLine[charIdx + 1]))
+						if (charIdx < LINE_LENGTH && char.IsDigit(currentLine[charIdx + 1]))
 						{
 							var numberStartIdx = charIdx + 1;
 							var numberEndIdx = numberStartIdx;
-							while (numberEndIdx < lineLength && char.IsDigit(currentLine[numberEndIdx + 1]))
+							while (numberEndIdx < LINE_LENGTH && char.IsDigit(currentLine[numberEndIdx + 1]))
 							{
 								numberEndIdx++;
 							}
@@ -240,7 +236,7 @@ namespace Day03
 				var adjacentEnd = index;
 
 				//There was an adjacent number and we need to find the end of it
-				while (adjacentEnd < lineLength && char.IsDigit(line[adjacentEnd + 1]))
+				while (adjacentEnd < LINE_LENGTH && char.IsDigit(line[adjacentEnd + 1]))
 				{
 					adjacentEnd++;
 				}
@@ -277,7 +273,7 @@ namespace Day03
 
 		private static string searchForPossibleNumberDiagonalLeft(string line, int index)
 		{
-			if (index < lineLength && char.IsDigit(line[index + 1]))
+			if (index < LINE_LENGTH && char.IsDigit(line[index + 1]))
 			{
 				//number in prior line diagonal above left, need to find the beginning of it
 				/*
@@ -285,7 +281,7 @@ namespace Day03
 				....*.702..
 				 */
 				var adjacentEnd = index;
-				while (adjacentEnd < lineLength && char.IsDigit(line[adjacentEnd + 1]))
+				while (adjacentEnd < LINE_LENGTH && char.IsDigit(line[adjacentEnd + 1]))
 				{
 					adjacentEnd++;
 				}
@@ -299,5 +295,8 @@ namespace Day03
 
 			return string.Empty;
 		}
+
 	}
+
+
 }

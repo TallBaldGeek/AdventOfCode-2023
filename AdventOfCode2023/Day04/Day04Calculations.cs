@@ -1,7 +1,15 @@
-﻿namespace Day04
+﻿using System.Reflection;
+using Utilities;
+
+namespace Day04
 {
 	public static class Day04Calculations
 	{
+		public static string[] GetInput()
+		{
+			return Utils.ReadAllResourceLines(Assembly.GetExecutingAssembly(), "input.txt");
+		}
+
 		public static int PartOne(string[]? input)
 		{
 			var totalPoints = new List<int>();
@@ -63,6 +71,7 @@
 			}
 			return cardCount.Sum();
 		}
+
 		public static int PartTwo_Borrowed(string[]? input)
 		{
 			//stolen from https://github.com/MartinZikmund/advent-of-code-2023/blob/main/Day04_2/Program.cs
