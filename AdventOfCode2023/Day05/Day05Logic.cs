@@ -5,7 +5,7 @@ namespace Day05
 {
 	public class Day05Logic
 	{
-		private readonly Dictionary<string, List<RangeData>> _mappings = new();
+		private readonly Dictionary<string, List<MappingRange>> _mappings = new();
 		const string _seedToSoil = "seed-to-soil";
 		const string _soilToFertilizer = "soil-to-fertilizer";
 		const string _fertilizerToWater = "fertilizer-to-water";
@@ -86,26 +86,41 @@ Seed number 55 corresponds to soil number 57.
 Seed number 13 corresponds to soil number 13.
 			 */
 
-			var seeds = new List<long>();
-			var seedToSoil = new Dictionary<long, long>();
-			var soilToFertilizer = new Dictionary<long, long>();
-			var fertilizerToWater = new Dictionary<long, long>();
-			var waterToLight = new Dictionary<long, long>();
-			var lightToTemp = new Dictionary<long, long>();
-			var tempToHumidity = new Dictionary<long, long>();
-			var humidityToLoc = new Dictionary<long, long>();
-			//2276375722 real value for input
-			//2147483647 - max int
-
-			for (int i = 0; i < input.Length; i++)
-			{
-				if (input[i].StartsWith("seeds:"))
-				{
-					seeds = input[i].Split(':')[1]
+			var seeds = input[0].Split(':')[1]
 						.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
 						.Select(long.Parse)
 						.ToList();
-				}
+			//2276375722 real value for input
+			//2147483647 - max int
+
+			populateMappings(input);
+
+			var mappedLocations = new List<long>();
+			foreach (var seed in seeds)
+			{
+				long loc = walkAllMappings(seed);
+				mappedLocations.Add(loc);
+			}
+			mappedLocations.Sort();
+			return mappedLocations.First();
+		}
+
+		private long walkAllMappings(long seed)
+		{
+			var soil = mapSourceToDest(_seedToSoil, seed);
+			var fert = mapSourceToDest(_soilToFertilizer, soil);
+			var water = mapSourceToDest(_fertilizerToWater, fert);
+			var light = mapSourceToDest(_waterToLight, water);
+			var temp = mapSourceToDest(_lightToTemp, light);
+			var humidity = mapSourceToDest(_tempToHumidity, temp);
+			var loc = mapSourceToDest(_humidityToLoc, humidity);
+			return loc;
+		}
+
+		private void populateMappings(string[] input)
+		{
+			for (int i = 0; i < input.Length; i++)
+			{
 				if (input[i].Contains("map:"))
 				{
 					var mapType = input[i].Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)[0];
@@ -141,23 +156,46 @@ Seed number 13 corresponds to soil number 13.
 					*/
 				}
 			}
+		}
+
+		public long PartTwo(string[] input)
+		{
+			var seedRanges = new List<SeedRange>();
+			var seedInput = input[0].Split(':')[1]
+						.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+						.Select(long.Parse)
+						.ToList();
+			for (int i = 0; i < seedInput.Count; i += 2)
+			{
+				seedRanges.Add(new SeedRange()
+				{
+					SeedBegin = seedInput[i],
+					Length = seedInput[i + 1]
+				});
+			}
+
+			populateMappings(input);
 
 			var mappedLocations = new List<long>();
-			foreach (var seed in seeds)
+			foreach (var seedRange in seedRanges)
 			{
-				var soil = mapSourceToDest(_seedToSoil, seed);
-				var fert = mapSourceToDest(_soilToFertilizer, soil);
-				var water = mapSourceToDest(_fertilizerToWater, fert);
-				var light = mapSourceToDest(_waterToLight, water);
-				var temp = mapSourceToDest(_lightToTemp, light);
-				var humidity = mapSourceToDest(_tempToHumidity, temp);
-				var loc = mapSourceToDest(_humidityToLoc, humidity);
-				mappedLocations.Add(loc);
+				/*
+                Assumption is that I don't have to check EVERY seed in a range. As you go through mappings
+				the end result for any range of seeds is that the dest number INCREASES as you move up the range
+				So the lowest value possible for a humidity-to-location mapping would result from the FIRST
+				seed in a given range. 
+				BUT need to check all ranges to see which results in the lowest mapping
+                 */
+				var end = seedRange.SeedBegin + seedRange.Length;
+				for (long i = seedRange.SeedBegin; i < end; i++)
+				{
+					var loc = walkAllMappings(i);
+					mappedLocations.Add(loc);
+				}
 			}
 			mappedLocations.Sort();
 			return mappedLocations.First();
 		}
-
 		long mapSourceToDest(string mappingName, long sourceNum)
 		{
 			//if (sourceToDest.ContainsKey(sourceNum))
@@ -180,7 +218,7 @@ Seed number 13 corresponds to soil number 13.
 
 		int populateRange(string[] input, int i, string key)
 		{
-			var ranges = new List<RangeData>();
+			var ranges = new List<MappingRange>();
 			while (i < input.Length && !string.IsNullOrEmpty(input[i]) && char.IsDigit(input[i][0]))
 			{
 				var segments = input[i]
@@ -192,7 +230,7 @@ Seed number 13 corresponds to soil number 13.
 				var length = segments[2];
 				//50		98			2
 				//destStart sourceStart length
-				ranges.Add(new RangeData
+				ranges.Add(new MappingRange
 				{
 					SourceBegin = sourceStart,
 					//SourceEnd = sourceStart + length,
@@ -215,7 +253,12 @@ Seed number 13 corresponds to soil number 13.
 		}
 	}
 
-	public class RangeData
+	public class SeedRange
+	{
+		public long SeedBegin { get; set; }
+		public long Length { get; set; }
+	}
+	public class MappingRange
 	{
 		public long SourceBegin { get; set; }
 		//public long SourceEnd { get; set; }
