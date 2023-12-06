@@ -8,7 +8,11 @@
 			//var input = Day05Logic.GetSample();
 			var input = Day05Logic.GetInput();
 
-			Console.WriteLine($"The lowest location number for any initial seed numbers is {Day05Logic.PartOne(input)}");
+			var logic = new Day05Logic();
+			Console.WriteLine($"The lowest location number for any initial seed numbers is {logic.PartOne(input)}");
+			//correct answer is 484023871
+
+
 		}
 	}
 }

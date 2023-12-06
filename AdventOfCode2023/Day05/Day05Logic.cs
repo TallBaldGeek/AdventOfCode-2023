@@ -3,8 +3,16 @@ using Utilities;
 
 namespace Day05
 {
-	public static class Day05Logic
+	public class Day05Logic
 	{
+		private readonly Dictionary<string, List<RangeData>> _mappings = new();
+		const string _seedToSoil = "seed-to-soil";
+		const string _soilToFertilizer = "soil-to-fertilizer";
+		const string _fertilizerToWater = "fertilizer-to-water";
+		const string _waterToLight = "water-to-light";
+		const string _lightToTemp = "light-to-temperature";
+		const string _tempToHumidity = "temperature-to-humidity";
+		const string _humidityToLoc = "humidity-to-location";
 		public static string[] GetInput()
 		{
 			return Utils.ReadAllResourceLines(Assembly.GetExecutingAssembly(), "input.txt");
@@ -15,7 +23,7 @@ namespace Day05
 			return Utils.ReadAllResourceLines(Assembly.GetExecutingAssembly(), "sample.txt");
 		}
 
-		public static long PartOne(string[] input)
+		public long PartOne(string[] input)
 		{
 			/*
 			https://adventofcode.com/2023/day/5
@@ -86,7 +94,6 @@ Seed number 13 corresponds to soil number 13.
 			var lightToTemp = new Dictionary<long, long>();
 			var tempToHumidity = new Dictionary<long, long>();
 			var humidityToLoc = new Dictionary<long, long>();
-
 			//2276375722 real value for input
 			//2147483647 - max int
 
@@ -103,7 +110,8 @@ Seed number 13 corresponds to soil number 13.
 				{
 					var mapType = input[i].Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)[0];
 					i++;
-
+					i = populateRange(input, i, mapType);
+					/*
 					switch (mapType)
 					{
 						case "seed-to-soil":
@@ -130,37 +138,49 @@ Seed number 13 corresponds to soil number 13.
 						default:
 							break;
 					}
+					*/
 				}
 			}
 
 			var mappedLocations = new List<long>();
 			foreach (var seed in seeds)
 			{
-				var soil = mapSourceToDest(seedToSoil, seed);
-				var fert = mapSourceToDest(soilToFertilizer, soil);
-				var water = mapSourceToDest(fertilizerToWater, fert);
-				var light = mapSourceToDest(waterToLight, water);
-				var temp = mapSourceToDest(lightToTemp, light);
-				var humidity = mapSourceToDest(tempToHumidity, temp);
-				var loc = mapSourceToDest(humidityToLoc, humidity);
+				var soil = mapSourceToDest(_seedToSoil, seed);
+				var fert = mapSourceToDest(_soilToFertilizer, soil);
+				var water = mapSourceToDest(_fertilizerToWater, fert);
+				var light = mapSourceToDest(_waterToLight, water);
+				var temp = mapSourceToDest(_lightToTemp, light);
+				var humidity = mapSourceToDest(_tempToHumidity, temp);
+				var loc = mapSourceToDest(_humidityToLoc, humidity);
 				mappedLocations.Add(loc);
 			}
 			mappedLocations.Sort();
 			return mappedLocations.First();
 		}
 
-		static long mapSourceToDest(Dictionary<long, long> sourceToDest, long sourceNum)
+		long mapSourceToDest(string mappingName, long sourceNum)
 		{
-			if (sourceToDest.ContainsKey(sourceNum))
-			{
-				return sourceToDest[sourceNum];
-			}
+			//if (sourceToDest.ContainsKey(sourceNum))
+			//{
+			//	return sourceToDest[sourceNum];
+			//}
 
-			return sourceNum;
+			var ranges = _mappings[mappingName];
+			//foreach (var range in ranges)
+			//{
+
+			//}
+			var match = ranges.Where(r => sourceNum >= r.SourceBegin && sourceNum <= r.SourceBegin + r.Length).FirstOrDefault();
+			if (match == null)
+			{
+				return sourceNum;
+			}
+			return match.DestinationBegin + (sourceNum - match.SourceBegin);
 		}
 
-		static int populateRange(string[] input, Dictionary<long, long> sourceToDest, int i)
+		int populateRange(string[] input, int i, string key)
 		{
+			var ranges = new List<RangeData>();
 			while (i < input.Length && !string.IsNullOrEmpty(input[i]) && char.IsDigit(input[i][0]))
 			{
 				var segments = input[i]
@@ -172,17 +192,36 @@ Seed number 13 corresponds to soil number 13.
 				var length = segments[2];
 				//50		98			2
 				//destStart sourceStart length
-				for (var j = 0; j < length; j++)
+				ranges.Add(new RangeData
 				{
-					var sourceNum = sourceStart + j;
-					var destNum = destStart + j;
-					sourceToDest.Add(sourceNum, destNum);
-				}
+					SourceBegin = sourceStart,
+					//SourceEnd = sourceStart + length,
+					DestinationBegin = destStart,
+					//DestinationEnd = destStart + length
+					Length = length
+				});
+
+				//for (var j = 0; j < length; j++)
+				//{
+				//	var sourceNum = sourceStart + j;
+				//	var destNum = destStart + j;
+				//	sourceToDest.Add(sourceNum, destNum);
+				//}
 				i++;
 			}
 
+			_mappings.Add(key, ranges);
 			return i;
 		}
+	}
+
+	public class RangeData
+	{
+		public long SourceBegin { get; set; }
+		//public long SourceEnd { get; set; }
+		public long DestinationBegin { get; set; }
+		//public long DestinationEnd { get; set; }
+		public long Length { get; set; }
 	}
 
 }
