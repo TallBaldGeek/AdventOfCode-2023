@@ -105,6 +105,62 @@ Seed number 13 corresponds to soil number 13.
 			return mappedLocations.First();
 		}
 
+		public long PartTwo(string[] input)
+		{
+			var seedRanges = new List<SeedRange>();
+			var seedInput = input[0].Split(':')[1]
+						.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+						.Select(long.Parse)
+						.ToList();
+			for (int i = 0; i < seedInput.Count; i += 2)
+			{
+				seedRanges.Add(new SeedRange()
+				{
+					SeedBegin = seedInput[i],
+					Length = seedInput[i + 1]
+				});
+			}
+
+			populateMappings(input);
+
+
+			var mappedLocations = new List<long>();
+			foreach (var seedRange in seedRanges)
+			{
+				/*
+				 12/5
+                Assumption is that I don't have to check EVERY seed in a range. As you go through mappings
+				the end result for any range of seeds is that the dest number INCREASES as you move up the range
+				So the lowest value possible for a humidity-to-location mapping would result from the FIRST
+				seed in a given range. 
+				BUT need to check all ranges to see which results in the lowest mapping
+
+				Maybe that assumption was wrong. 
+				I had to check all the seeds in a range to find the entire list of locations, then sort that and find the lowest
+				This worked on sample data but took forever and gave an OOM exception on the real data
+                 */
+				/*
+				 Alternate idea
+				Start from the end of the mapping chain
+				Figure out the lowest range for locations
+				Work backwards from there to figure out the possible range of seeds that would lead to that
+
+				Steps
+				Sort all mappings by DestinationBegin
+				Find lowest DestinationBegin in _humidityToLoc
+				
+				 */
+				var end = seedRange.SeedBegin + seedRange.Length;
+				for (long i = seedRange.SeedBegin; i < end; i++)
+				{
+					var loc = walkAllMappings(i);
+					mappedLocations.Add(loc);
+				}
+			}
+			mappedLocations.Sort();
+			return mappedLocations.First();
+		}
+
 		private long walkAllMappings(long seed)
 		{
 			var soil = mapSourceToDest(_seedToSoil, seed);
@@ -158,57 +214,10 @@ Seed number 13 corresponds to soil number 13.
 			}
 		}
 
-		public long PartTwo(string[] input)
+		private long mapSourceToDest(string mappingName, long sourceNum)
 		{
-			var seedRanges = new List<SeedRange>();
-			var seedInput = input[0].Split(':')[1]
-						.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
-						.Select(long.Parse)
-						.ToList();
-			for (int i = 0; i < seedInput.Count; i += 2)
-			{
-				seedRanges.Add(new SeedRange()
-				{
-					SeedBegin = seedInput[i],
-					Length = seedInput[i + 1]
-				});
-			}
-
-			populateMappings(input);
-
-			var mappedLocations = new List<long>();
-			foreach (var seedRange in seedRanges)
-			{
-				/*
-                Assumption is that I don't have to check EVERY seed in a range. As you go through mappings
-				the end result for any range of seeds is that the dest number INCREASES as you move up the range
-				So the lowest value possible for a humidity-to-location mapping would result from the FIRST
-				seed in a given range. 
-				BUT need to check all ranges to see which results in the lowest mapping
-                 */
-				var end = seedRange.SeedBegin + seedRange.Length;
-				for (long i = seedRange.SeedBegin; i < end; i++)
-				{
-					var loc = walkAllMappings(i);
-					mappedLocations.Add(loc);
-				}
-			}
-			mappedLocations.Sort();
-			return mappedLocations.First();
-		}
-		long mapSourceToDest(string mappingName, long sourceNum)
-		{
-			//if (sourceToDest.ContainsKey(sourceNum))
-			//{
-			//	return sourceToDest[sourceNum];
-			//}
-
 			var ranges = _mappings[mappingName];
-			//foreach (var range in ranges)
-			//{
-
-			//}
-			var match = ranges.Where(r => sourceNum >= r.SourceBegin && sourceNum <= r.SourceBegin + r.Length).FirstOrDefault();
+			var match = ranges.FirstOrDefault(r => sourceNum >= r.SourceBegin && sourceNum <= r.SourceBegin + r.Length);
 			if (match == null)
 			{
 				return sourceNum;
@@ -216,7 +225,7 @@ Seed number 13 corresponds to soil number 13.
 			return match.DestinationBegin + (sourceNum - match.SourceBegin);
 		}
 
-		int populateRange(string[] input, int i, string key)
+		private int populateRange(string[] input, int i, string key)
 		{
 			var ranges = new List<MappingRange>();
 			while (i < input.Length && !string.IsNullOrEmpty(input[i]) && char.IsDigit(input[i][0]))
