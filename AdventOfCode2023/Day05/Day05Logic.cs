@@ -15,7 +15,7 @@ namespace Day05
 			return Utils.ReadAllResourceLines(Assembly.GetExecutingAssembly(), "sample.txt");
 		}
 
-		public static int PartOne(string[] input)
+		public static long PartOne(string[] input)
 		{
 			/*
 			https://adventofcode.com/2023/day/5
@@ -132,17 +132,40 @@ Seed number 13 corresponds to soil number 13.
 					}
 				}
 			}
-			return 1;
 
-
+			var mappedLocations = new List<long>();
+			foreach (var seed in seeds)
+			{
+				var soil = mapSourceToDest(seedToSoil, seed);
+				var fert = mapSourceToDest(soilToFertilizer, soil);
+				var water = mapSourceToDest(fertilizerToWater, fert);
+				var light = mapSourceToDest(waterToLight, water);
+				var temp = mapSourceToDest(lightToTemp, light);
+				var humidity = mapSourceToDest(tempToHumidity, temp);
+				var loc = mapSourceToDest(humidityToLoc, humidity);
+				mappedLocations.Add(loc);
+			}
+			mappedLocations.Sort();
+			return mappedLocations.First();
 		}
-		static int populateRange(string[] input, Dictionary<long, long> seedToSoil, int i)
+
+		static long mapSourceToDest(Dictionary<long, long> sourceToDest, long sourceNum)
+		{
+			if (sourceToDest.ContainsKey(sourceNum))
+			{
+				return sourceToDest[sourceNum];
+			}
+
+			return sourceNum;
+		}
+
+		static int populateRange(string[] input, Dictionary<long, long> sourceToDest, int i)
 		{
 			while (i < input.Length && !string.IsNullOrEmpty(input[i]) && char.IsDigit(input[i][0]))
 			{
 				var segments = input[i]
 					.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
-					.Select(int.Parse)
+					.Select(long.Parse)
 					.ToArray();
 				var sourceStart = segments[1];
 				var destStart = segments[0];
@@ -153,7 +176,7 @@ Seed number 13 corresponds to soil number 13.
 				{
 					var sourceNum = sourceStart + j;
 					var destNum = destStart + j;
-					seedToSoil.Add(sourceNum, destNum);
+					sourceToDest.Add(sourceNum, destNum);
 				}
 				i++;
 			}
