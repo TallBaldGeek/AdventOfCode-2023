@@ -148,7 +148,22 @@ Seed number 13 corresponds to soil number 13.
 				Steps
 				Sort all mappings by DestinationBegin
 				Find lowest DestinationBegin in _humidityToLoc
+				That's the starting point for our target. 
+				BUT, could be a source that's less than that and therefore implicitly mapped
+
+				humidity-to-location map:
+				loc	hum	len
+				60	56	37 //locations start at 60
+				56	93	4  //locations start at 56
 				
+				Our ideal is a location from 0-55
+				Maps to hum also 0-55
+
+				temperature-to-humidity map:
+				hum tem len
+				0	69	1
+				1	0	69
+
 				 */
 				var end = seedRange.SeedBegin + seedRange.Length;
 				for (long i = seedRange.SeedBegin; i < end; i++)
