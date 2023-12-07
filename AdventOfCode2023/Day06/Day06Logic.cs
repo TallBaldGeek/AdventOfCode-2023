@@ -5,9 +5,6 @@ namespace Day06
 {
 	public class Day06Logic
 	{
-		private const int STARTING_SPEED = 0;
-		private const int ACCELERATION = 1;
-
 		public static string[] GetInput()
 		{
 			return Utils.ReadAllResourceLines(Assembly.GetExecutingAssembly(), "input.txt");
@@ -18,7 +15,7 @@ namespace Day06
 			return Utils.ReadAllResourceLines(Assembly.GetExecutingAssembly(), "sample.txt");
 		}
 
-		public int PartOne(string[] input)
+		public long PartOne(string[] input)
 		{
 			/*
 			Time:      7  15   30
@@ -27,12 +24,12 @@ namespace Day06
 			var times = input[0]
 				.Split(':', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)[1]
 				.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-				.Select(int.Parse)
+				.Select(long.Parse)
 				.ToArray();
 			var distances = input[1]
 				.Split(':', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)[1]
 				.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-				.Select(int.Parse)
+				.Select(long.Parse)
 				.ToArray();
 
 			var priorRaceStats = new List<RaceResults>();
@@ -41,7 +38,7 @@ namespace Day06
 				priorRaceStats.Add(new RaceResults(times[i], distances[i]));
 			}
 
-			var winningStrategyPossibilities = new List<int>();
+			var winningStrategyPossibilities = new List<long>();
 			foreach (var priorRaceStat in priorRaceStats)
 			{
 				winningStrategyPossibilities.Add(priorRaceStat.GetWinningStrategies().Count);
@@ -49,14 +46,33 @@ namespace Day06
 
 			return winningStrategyPossibilities.Aggregate((tot, curr) => tot * curr);
 		}
+
+		public long PartTwo(string[] input)
+		{
+			var inputTime = input[0]
+				.Split(':', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)[1]
+				.Replace(" ", string.Empty)
+				.Trim();
+			var inputDistance = input[1]
+				.Split(':', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)[1]
+				.Replace(" ", string.Empty)
+				.Trim();
+			var recordTime = long.Parse(inputTime);
+			var recordDistance = long.Parse(inputDistance);
+
+			var results = new RaceResults(recordTime, recordDistance);
+			var strategies = results.GetWinningStrategies();
+
+			return strategies.Count;
+		}
 	}
 
-	record RaceResults(int Duration, int Distance)
+	record RaceResults(long Duration, long Distance)
 	{
 		public List<WinningStrategy> GetWinningStrategies()
 		{
 			var list = new List<WinningStrategy>();
-			for (int buttonPressDuration = Duration - 1; buttonPressDuration > 0; buttonPressDuration--)
+			for (long buttonPressDuration = Duration - 1; buttonPressDuration > 0; buttonPressDuration--)
 			{
 				var boatMovementDuration = Duration - buttonPressDuration;
 				var speed = buttonPressDuration;
@@ -71,7 +87,7 @@ namespace Day06
 
 	}
 
-	record WinningStrategy(int ButtonPressDuration)
+	record WinningStrategy(long ButtonPressDuration)
 	{
 	}
 }
