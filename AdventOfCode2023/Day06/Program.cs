@@ -12,7 +12,7 @@
 			//Console.WriteLine($"Answer for Part One is {logic.PartOne(input)}");
 			//correct answer 1155175
 
-			Console.WriteLine($"Answer for Part One is {logic.PartTwo(input)}");
+			Console.WriteLine($"Answer for Part Two is {logic.PartTwo(input)}");
 
 		}
 	}

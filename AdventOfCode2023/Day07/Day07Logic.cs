@@ -5,6 +5,8 @@ namespace Day07
 {
 	public class Day07Logic
 	{
+
+
 		public static string[] GetInput()
 		{
 			return Utils.ReadAllResourceLines(Assembly.GetExecutingAssembly(), "input.txt");
@@ -40,13 +42,24 @@ High card, where all cards' labels are distinct: 23456
 			{
 				groupedHands[item] = new List<HandInfo>();
 			}
-			var ungroupedHands = new List<HandInfo>();
-			foreach (string s in input)
+			//var ungroupedHands = new List<HandInfo>();
+			//var groupedHands = new Dictionary<string, List<HandInfo>>();
+			foreach (var s in input)
 			{
 				var segments = s.Split(' ');
-				ungroupedHands.Add(new HandInfo(segments[0].ToCharArray(), int.Parse(segments[1])));
+				var handInfo = new HandInfo(segments[0].ToCharArray(), int.Parse(segments[1]));
+				//ungroupedHands.Add();
+				var strength = handInfo.GetStrength();
+				groupedHands[strength].Add(handInfo);
 			}
 
+			//var fiveOfAKinds = groupedHands[HandStrength.FiveOfAKind];
+			var sorter = new HandSorter();
+			foreach (var key in groupedHands.Keys)
+			{
+				groupedHands[key].Sort(sorter);
+			}
+			//fiveOfAKinds.Sort((h) => h.Cards[0]);
 			return 1;
 		}
 	}
@@ -63,9 +76,66 @@ High card, where all cards' labels are distinct: 23456
 
 	record HandInfo(char[] Cards, int Bid)
 	{
+		//TODO override comparison operator?
+
 		public HandStrength GetStrength()
 		{
-			return HandStrength.FiveOfAKind;
+			var cardGroups = Cards.GroupBy(c => c);
+			var groupCount = cardGroups.Count();
+			return groupCount switch
+			{
+				5 =>
+					//no cards in common
+					HandStrength.HighCard,
+				4 =>
+					//one pair and 3 singles
+					HandStrength.OnePair,
+				3 =>
+					//three of a kind + two singles
+					//two pair + 1 single
+					cardGroups.SingleOrDefault(x => x.Count() == 3) == null
+						? HandStrength.TwoPair
+						: HandStrength.ThreeOfAKind,
+				2 => HandStrength.FullHouse,
+				_ => HandStrength.FiveOfAKind
+			};
+		}
+	}
+
+	class HandSorter : IComparer<HandInfo>
+	{
+		private static Dictionary<char, int> _cardValues = new Dictionary<char, int>()
+		{
+			{ '2', 2 },
+			{ '3', 3 },
+			{ '4', 4 },
+			{ '5', 5 },
+			{ '6', 6 },
+			{ '7', 7 },
+			{ '8', 8 },
+			{ '9', 9 },
+			{ 'T', 10 },
+			{ 'J', 11 },
+			{ 'Q', 12 },
+			{ 'K', 13 },
+			{ 'A', 14 }
+		};
+
+		public int Compare(HandInfo? x, HandInfo? y)
+		{
+			for (var i = 0; i < x.Cards.Length; i++)
+			{
+				if (x.Cards[i] == y.Cards[i])
+				{
+					continue;
+				}
+
+				var xVal = _cardValues[x.Cards[i]];
+				var yVal = _cardValues[y.Cards[i]];
+				return xVal.CompareTo(yVal);
+			}
+
+			return -1;
 		}
 	}
 }
