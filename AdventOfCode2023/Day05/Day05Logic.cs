@@ -107,14 +107,14 @@ Seed number 13 corresponds to soil number 13.
 
 		public long PartTwo(string[] input)
 		{
-			var seedRanges = new List<SeedRange>();
+			var seedRanges = new List<PartOneSeedRange>();
 			var seedInput = input[0].Split(':')[1]
 						.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
 						.Select(long.Parse)
 						.ToList();
 			for (int i = 0; i < seedInput.Count; i += 2)
 			{
-				seedRanges.Add(new SeedRange()
+				seedRanges.Add(new PartOneSeedRange()
 				{
 					SeedBegin = seedInput[i],
 					Length = seedInput[i + 1]
@@ -277,7 +277,7 @@ Seed number 13 corresponds to soil number 13.
 		}
 	}
 
-	public class SeedRange
+	public class PartOneSeedRange
 	{
 		public long SeedBegin { get; set; }
 		public long Length { get; set; }
@@ -290,5 +290,7 @@ Seed number 13 corresponds to soil number 13.
 		//public long DestinationEnd { get; set; }
 		public long Length { get; set; }
 	}
+
+
 
 }

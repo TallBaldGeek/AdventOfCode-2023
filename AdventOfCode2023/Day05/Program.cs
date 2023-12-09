@@ -12,8 +12,10 @@
 			//Console.WriteLine($"The lowest location number for any initial seed numbers is {logic.PartOne(input)}");
 			//correct answer is 484023871
 
-			Console.WriteLine($"The lowest location number for any initial seed numbers is {logic.PartTwo(input)}");
-			//didn't get it working
+			//Console.WriteLine($"The lowest location number for any initial seed numbers is {logic.PartTwo(input)}");
+			var partTwo = new PartTwo();
+			Console.WriteLine($"The lowest location number for any initial seed numbers is {partTwo.Process()}");
+
 		}
 	}
 }
