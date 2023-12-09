@@ -59,24 +59,41 @@ High card, where all cards' labels are distinct: 23456
 			{
 				groupedHands[key].Sort(sorter);
 			}
+			var completeList = new List<HandInfo>();
+			completeList.AddRange(groupedHands[HandStrength.HighCard]);
+			completeList.AddRange(groupedHands[HandStrength.OnePair]);
+			completeList.AddRange(groupedHands[HandStrength.TwoPair]);
+			completeList.AddRange(groupedHands[HandStrength.ThreeOfAKind]);
+			completeList.AddRange(groupedHands[HandStrength.FullHouse]);
+			completeList.AddRange(groupedHands[HandStrength.FourOfAKind]);
+			completeList.AddRange(groupedHands[HandStrength.FiveOfAKind]);
+
+			var bidSum = 0;
+			for (int i = 0; i < completeList.Count; i++)
+			{
+				bidSum += completeList[i].Bid * (i + 1);
+			}
 			//fiveOfAKinds.Sort((h) => h.Cards[0]);
-			return 1;
+			return bidSum;
 		}
 	}
 	enum HandStrength
 	{
-		FiveOfAKind = 7,
-		FourOfAKind = 6,
-		FullHouse = 5,
-		ThreeOfAKind = 4,
-		TwoPair = 3,
+		HighCard = 1,
 		OnePair = 2,
-		HighCard = 1
+		TwoPair = 3,
+		ThreeOfAKind = 4,
+		FullHouse = 5,
+		FourOfAKind = 6,
+		FiveOfAKind = 7
 	}
 
 	record HandInfo(char[] Cards, int Bid)
 	{
-		//TODO override comparison operator?
+		public override string ToString()
+		{
+			return $"Cards = {string.Concat(Cards)} Bid = {Bid}";
+		}
 
 		public HandStrength GetStrength()
 		{
@@ -96,7 +113,9 @@ High card, where all cards' labels are distinct: 23456
 					cardGroups.SingleOrDefault(x => x.Count() == 3) == null
 						? HandStrength.TwoPair
 						: HandStrength.ThreeOfAKind,
-				2 => HandStrength.FullHouse,
+				2 => cardGroups.SingleOrDefault(x => x.Count() == 4) == null
+						? HandStrength.FullHouse
+						: HandStrength.FourOfAKind,
 				_ => HandStrength.FiveOfAKind
 			};
 		}
